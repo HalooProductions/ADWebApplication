@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using TpProjekti.Models;
 using Haloo.DirectoryServices;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TpProjekti.Controllers
 {
@@ -26,11 +27,24 @@ namespace TpProjekti.Controllers
             return View();
         }
 
+        [Authorize]
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
+            var username = GetAuthenticatedUserName();
+
+            var user = _manager.FindUser(username);
+
+            ViewData["Message"] = $"Kirjautunut käyttäjä: {user}";
 
             return View();
+        }
+
+        private string GetAuthenticatedUserName()
+        {
+            var user = User.Identity.Name;
+            // poista domain osa
+            user = user.Replace(_options.UserDomainPrefix, "");
+            return user;
         }
 
         public IActionResult Contact()
